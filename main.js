@@ -1,12 +1,18 @@
-// var roleHarvester = require('role.harvester');
+const spawn = require('spawn');
+const harvester = require('role.harvester');
 
 module.exports.loop = function () {
 
-    const spawn = require('spawn');
     const creepsThresholds = 1;
 
-    console.log(`CPU bucket is: ${Game.cpu.bucket}`);
+    if (Game.cpu.bucket < 10000) {
+        console.log(`CPU bucket is:     ${Game.cpu.bucket}`);
+    }
 
-    spawn.determineCreepsNeed(creepsThresholds);
-    
+    if (Game.cpu.tickLimit < 500) {
+        console.log(`CPU tick limit is: ${Game.cpu.tickLimit}`);
+    }
+
+    spawn.determineCreepsNeed(); //0.2 CPU
+    harvester.runHarvesters();
 }

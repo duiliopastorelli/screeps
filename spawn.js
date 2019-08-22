@@ -1,18 +1,41 @@
-const numberOfExistingCreeps = Object.entries(Game.creeps).length;
-const spawn1 = Game.spawns.Spawn1;
+const creepsDetails = require('utils.creepsDetails');
 
-function determineCreepsNeed(threshold = 1){
-    if (numberOfExistingCreeps < threshold) {
-        console.log(`There not enough Creeps available (threshold is ${threshold}), we need to spawn a new one.`)
-        spawnCreep([WORK, CARRY, MOVE]);
+const numberOfExistingCreeps = Object.keys(Game.creeps).length;
+
+function determineCreepsNeed() {
+    if (numberOfExistingCreeps === 0) {
+        let buildCost = creepsDetails.configuration.harvester.base.buildCost;
+        suitableSpawn = determineSuitableSpawns(buildCost);
+        suitableSpawn ?
+            performCreepSpawn(suitableSpawn, creepsDetails.configuration.harvester.base.body) : //0.2 CPU
+            null;
     }
 }
 
-function spawnCreep(body){
-    if (spawn1.spawning === null) {
+function performCreepSpawn(spawnName, body) {
+    let currentSpawn = Game.spawns[spawnName];
+    if (currentSpawn.spawning === null) {
         console.log('Spawn is not currently spawning, initiate spawning now.');
-        spawn1.spawnCreep(body, `Harvester-${Game.time}`);
+        currentSpawn.spawnCreep(body, `Harvester-${Game.time}`, {
+            memory: {
+                role: 'harvester',
+                activity: 'IDLE'
+            }
+        }); //0.2 CPU
     }
+}
+
+function determineSuitableSpawns(buildCost) {
+    for (let key in Game.spawns) {
+        if (
+            Game.spawns[key].energy >= buildCost &&
+            Game.spawns[key].spawning === null
+        ) {
+            return key;
+        }
+    }
+
+    return null;
 }
 
 module.exports = {
